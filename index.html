@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>டீக்கடை கணக்கு</title>
+<style>
+  :root{
+    --tea:#7B3F00;          /* strong tea brown */
+    --tea-dark:#5C2E00;
+    --cream:#FFF6EA;         /* milk-tea cream background */
+    --card:#FFFFFF;
+    --ink:#2B1A0E;
+    --muted:#8A7361;
+    --red:#C62828;
+    --red-bg:#FDECEA;
+    --green:#2E7D32;
+    --green-bg:#E8F5E9;
+    --amber:#E65100;
+    --line:#EFDFC9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:"Noto Sans Tamil",-apple-system,"Segoe UI",Roboto,sans-serif;
+    background:var(--cream);color:var(--ink);
+    max-width:520px;margin:0 auto;min-height:100vh;
+    padding-bottom:100px;
+  }
+  /* ---------- Header ---------- */
+  header{
+    background:var(--tea);color:#fff;
+    padding:16px 16px 14px;
+    border-radius:0 0 22px 22px;
+    text-align:center;
+  }
+  header h1{font-size:22px;font-weight:800;letter-spacing:.3px}
+  header .cup{font-size:26px;margin-right:6px}
+  .total-bar{
+    display:flex;justify-content:center;gap:12px;margin-top:12px;
+  }
+  .total-box{
+    background:rgba(255,255,255,.14);border-radius:14px;
+    padding:8px 18px;text-align:center;min-width:130px;
+  }
+  .total-box .amt{font-size:24px;font-weight:800}
+  .total-box .lbl{font-size:12px;opacity:.9;margin-top:2px}
+  /* ---------- Customer grid ---------- */
+  .grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    padding:16px 14px;
+  }
+  .cust{
+    background:var(--card);border-radius:18px;
+    padding:12px 8px 10px;text-align:center;
+    border:2px solid var(--line);cursor:pointer;
+    transition:transform .1s ease;
+    position:relative;
+  }
+  .cust:active{transform:scale(.94)}
+  .cust.danger{border-color:var(--red)}
+  .cust.danger::after{
+    content:"⚠️";position:absolute;top:6px;right:8px;font-size:14px;
+  }
+  .face{
+    width:64px;height:64px;border-radius:50%;
+    margin:0 auto 8px;overflow:hidden;
+    border:3px solid var(--line);
+    background:#EEE;
+  }
+  .cust.danger .face{border-color:var(--red)}
+  .face img,.face svg{width:100%;height:100%;object-fit:cover;display:block}
+  .owed{font-size:19px;font-weight:800;color:var(--red)}
+  .owed.zero{color:var(--green)}
+  .days{font-size:10.5px;color:var(--muted);margin-top:2px}
+  /* Add-customer tile */
+  .cust.addnew{
+    border-style:dashed;border-color:#C9B392;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    min-height:130px;color:var(--tea);
+  }
+  .cust.addnew .plus{font-size:34px;font-weight:800;line-height:1}
+  .cust.addnew .txt{font-size:13px;font-weight:700;margin-top:6px}
+  /* ---------- Bottom sheet ---------- */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(43,26,14,.55);z-index:10}
+  .overlay.show{display:block}
+  .sheet{
+    position:fixed;bottom:0;left:50%;transform:translate(-50%,105%);
+    width:100%;max-width:520px;background:#fff;z-index:11;
+    border-radius:26px 26px 0 0;padding:20px 18px 26px;
+    transition:transform .25s ease;text-align:center;
+  }
+  .sheet.show{transform:translate(-50%,0)}
+  .sheet .face{width:86px;height:86px;border-width:4px}
+  .sheet .bal{font-size:34px;font-weight:800;color:var(--red);margin-top:6px}
+  .sheet .bal.zero{color:var(--green)}
+  .sheet .bal-lbl{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .section-lbl{
+    font-size:14px;font-weight:800;margin:10px 0 8px;color:var(--ink);
+  }
+  .btn-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
+  .tea-btn{
+    background:var(--red-bg);color:var(--red);
+    border:2px solid #F5C6C0;border-radius:14px;
+    padding:14px 4px;font-size:17px;font-weight:800;cursor:pointer;
+    font-family:inherit;
+  }
+  .tea-btn:active{background:#F9D7D3}
+  .pay-btn{
+    background:var(--green-bg);color:var(--green);
+    border:2px solid #BFE3C2;border-radius:14px;
+    padding:14px 4px;font-size:17px;font-weight:800;cursor:pointer;
+    font-family:inherit;
+  }
+  .pay-btn:active{background:#D4EED6}
+  .full-pay{
+    grid-column:span 4;font-size:16px;
+  }
+  .close-btn{
+    width:100%;background:none;border:none;color:var(--muted);
+    padding:14px 12px 2px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700;
+  }
+  .remove-btn{
+    background:none;border:none;color:#B99;font-size:12.5px;
+    margin-top:10px;cursor:pointer;font-family:inherit;text-decoration:underline;
+  }
+  /* ---------- Add-customer sheet ---------- */
+  .cam-box{
+    width:120px;height:120px;border-radius:50%;margin:6px auto 14px;
+    border:3px dashed #C9B392;display:flex;align-items:center;justify-content:center;
+    font-size:40px;background:#FBF3E6;cursor:pointer;overflow:hidden;
+  }
+  .cam-box img{width:100%;height:100%;object-fit:cover}
+  .cam-hint{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+  .save-btn{
+    width:100%;background:var(--tea);color:#fff;border:none;
+    border-radius:14px;padding:15px;font-size:17px;font-weight:800;
+    cursor:pointer;font-family:inherit;
+  }
+  .save-btn:active{background:var(--tea-dark)}
+  .save-btn:disabled{opacity:.45}
+  /* ---------- Toast & note ---------- */
+  .toast{
+    position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-90px);
+    background:var(--ink);color:#fff;padding:11px 20px;border-radius:999px;
+    font-size:15px;font-weight:700;z-index:20;transition:transform .25s ease;
+    white-space:nowrap;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .demo-note{
+    text-align:center;font-size:11.5px;color:var(--muted);
+    padding:6px 24px 20px;line-height:1.6;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="cup">☕</span>டீக்கடை கணக்கு</h1>
+  <div class="total-bar">
+    <div class="total-box">
+      <div class="amt" id="totalOwed">₹0</div>
+      <div class="lbl">மொத்த பாக்கி</div>
+    </div>
+    <div class="total-box">
+      <div class="amt" id="totalPeople">0</div>
+      <div class="lbl">பாக்கி உள்ளவர்கள்</div>
+    </div>
+  </div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="demo-note">
+  இது மாதிரி (demo) செயலி — refresh செய்தால் கணக்கு அழிந்துவிடும்.<br>
+  முழு செயலியில் கணக்கு நிரந்தரமாக சேமிக்கப்படும்.
+</div>
+
+<!-- ============ Customer detail sheet ============ -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<div class="sheet" id="custSheet">
+  <div class="face" id="dFace"></div>
+  <div class="bal" id="dBal">₹0</div>
+  <div class="bal-lbl">பாக்கி</div>
+
+  <div class="section-lbl">☕ டீ குடித்தார் — கடன் சேர்</div>
+  <div class="btn-row">
+    <button class="tea-btn" onclick="addCredit(10)">+₹10</button>
+    <button class="tea-btn" onclick="addCredit(15)">+₹15</button>
+    <button class="tea-btn" onclick="addCredit(20)">+₹20</button>
+    <button class="tea-btn" onclick="addCredit(50)">+₹50</button>
+  </div>
+
+  <div class="section-lbl">💵 பணம் வந்தது</div>
+  <div class="btn-row">
+    <button class="pay-btn" onclick="payAmount(10)">₹10</button>
+    <button class="pay-btn" onclick="payAmount(20)">₹20</button>
+    <button class="pay-btn" onclick="payAmount(50)">₹50</button>
+    <button class="pay-btn" onclick="payAmount(100)">₹100</button>
+    <button class="pay-btn full-pay" onclick="payFull()">✔ முழு பாக்கியும் வந்தது</button>
+  </div>
+
+  <button class="remove-btn" onclick="removeCustomer()">இந்த நபரை நீக்கு</button>
+  <button class="close-btn" onclick="closeAll()">மூடு</button>
+</div>
+
+<!-- ============ Add customer sheet ============ -->
+<div class="sheet" id="addSheet">
+  <div class="section-lbl" style="font-size:17px">புது ஆள் சேர்</div>
+  <div class="cam-box" id="camBox" onclick="document.getElementById('camInput').click()">📷</div>
+  <div class="cam-hint">மேலே தட்டி புகைப்படம் எடுக்கவும்</div>
+  <input type="file" id="camInput" accept="image/*" capture="user" style="display:none" onchange="photoTaken(this)">
+  <button class="save-btn" id="saveNew" onclick="saveCustomer()" disabled>சேமி</button>
+  <button class="close-btn" onclick="closeAll()">மூடு</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================================================================
+// Sample customers with simple cartoon faces (SVG) for the demo.
+// In the real app these would be actual photos taken by the owner.
+// ==================================================================
+function faceSVG(skin, shirt, mustache){
+  return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+    <rect width="64" height="64" fill="#F3E7D3"/>
+    <circle cx="32" cy="26" r="14" fill="${skin}"/>
+    <rect x="14" y="42" width="36" height="22" rx="10" fill="${shirt}"/>
+    <circle cx="27" cy="24" r="1.8" fill="#2B1A0E"/>
+    <circle cx="37" cy="24" r="1.8" fill="#2B1A0E"/>
+    ${mustache ? '<rect x="27" y="30" width="10" height="2.6" rx="1.3" fill="#3A2A1A"/>' : ''}
+    <path d="M27 34 q5 3 10 0" stroke="#3A2A1A" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
+let customers = [
+  {photo:faceSVG("#C68B59","#1565C0",true),  owed:185, since:12},
+  {photo:faceSVG("#A96B44","#2E7D32",false), owed:240, since:21},
+  {photo:faceSVG("#D9A066","#6A1B9A",true),  owed:60,  since:4},
+  {photo:faceSVG("#B37847","#E65100",false), owed:0,   since:0},
+  {photo:faceSVG("#C68B59","#37474F",true),  owed:35,  since:2},
+  {photo:faceSVG("#A96B44","#AD1457",false), owed:120, since:8},
+];
+
+let current = -1;      // which customer sheet is open
+let newPhoto = null;   // photo for the add-customer flow
+const DANGER = 200;    // ₹ limit that triggers the warning mark
+
+// ==================================================================
+// Render the face grid
+// ==================================================================
+function render(){
+  let total = 0, people = 0;
+  customers.forEach(c => { total += c.owed; if (c.owed > 0) people++; });
+  document.getElementById("totalOwed").textContent = "₹" + total;
+  document.getElementById("totalPeople").textContent = people;
+
+  // Sort: biggest debt first, zero-balance people last
+  const order = customers.map((c,i)=>({c,i})).sort((a,b)=>b.c.owed - a.c.owed);
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = order.map(({c,i}) => `
+    <div class="cust ${c.owed >= DANGER ? 'danger':''}" onclick="openCustomer(${i})">
+      <div class="face">${c.photo.startsWith('<svg') ? c.photo : `<img src="${c.photo}">`}</div>
+      <div class="owed ${c.owed===0?'zero':''}">${c.owed===0 ? '✔' : '₹'+c.owed}</div>
+      <div class="days">${c.owed===0 ? 'பாக்கி இல்லை' : c.since + ' நாட்கள்'}</div>
+    </div>`).join("")
+    + `
+    <div class="cust addnew" onclick="openAdd()">
+      <div class="plus">＋</div>
+      <div class="txt">புது ஆள்</div>
+    </div>`;
+}
+
+// ==================================================================
+// Customer sheet
+// ==================================================================
+function openCustomer(i){
+  current = i;
+  const c = customers[i];
+  document.getElementById("dFace").innerHTML =
+    c.photo.startsWith('<svg') ? c.photo : `<img src="${c.photo}">`;
+  updateBal();
+  document.getElementById("overlay").classList.add("show");
+  document.getElementById("custSheet").classList.add("show");
+}
+
+function updateBal(){
+  const c = customers[current];
+  const el = document.getElementById("dBal");
+  el.textContent = "₹" + c.owed;
+  el.className = "bal" + (c.owed === 0 ? " zero" : "");
+}
+
+function addCredit(amt){
+  const c = customers[current];
+  if (c.owed === 0) c.since = 1;
+  c.owed += amt;
+  updateBal(); render();
+  toast("☕ ₹" + amt + " கடன் சேர்ந்தது");
+}
+
+function payAmount(amt){
+  const c = customers[current];
+  c.owed = Math.max(0, c.owed - amt);
+  if (c.owed === 0) c.since = 0;
+  updateBal(); render();
+  toast("💵 ₹" + amt + " வரவு வைத்தாச்சு");
+}
+
+function payFull(){
+  const c = customers[current];
+  if (c.owed === 0){ toast("பாக்கி எதுவும் இல்லை"); return; }
+  const amt = c.owed;
+  c.owed = 0; c.since = 0;
+  updateBal(); render();
+  toast("✔ ₹" + amt + " முழுசும் வந்தது!");
+}
+
+function removeCustomer(){
+  customers.splice(current,1);
+  closeAll(); render();
+  toast("நபர் நீக்கப்பட்டார்");
+}
+
+// ==================================================================
+// Add customer
+// ==================================================================
+function openAdd(){
+  newPhoto = null;
+  document.getElementById("camBox").innerHTML = "📷";
+  document.getElementById("saveNew").disabled = true;
+  document.getElementById("camInput").value = "";
+  document.getElementById("overlay").classList.add("show");
+  document.getElementById("addSheet").classList.add("show");
+}
+
+function photoTaken(input){
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    newPhoto = e.target.result;
+    document.getElementById("camBox").innerHTML = `<img src="${newPhoto}">`;
+    document.getElementById("saveNew").disabled = false;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveCustomer(){
+  customers.push({photo:newPhoto, owed:0, since:0});
+  closeAll(); render();
+  toast("✔ புது ஆள் சேர்ந்தார்");
+}
+
+// ==================================================================
+// Shared
+// ==================================================================
+function closeAll(){
+  document.getElementById("overlay").classList.remove("show");
+  document.getElementById("custSheet").classList.remove("show");
+  document.getElementById("addSheet").classList.remove("show");
+}
+
+let toastTimer;
+function toast(text){
+  const t = document.getElementById("toast");
+  t.textContent = text;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+render();
+</script>
+</body>
+</html>
