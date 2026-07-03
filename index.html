@@ -36,10 +36,10 @@
   .total-bar{display:flex;justify-content:center;gap:12px;margin-top:12px}
   .total-box{
     background:rgba(255,255,255,.14);border-radius:14px;
-    padding:8px 18px;text-align:center;min-width:130px;
+    padding:8px 14px;text-align:center;min-width:105px;
   }
-  .total-box .amt{font-size:24px;font-weight:800}
-  .total-box .lbl{font-size:12px;opacity:.9;margin-top:2px}
+  .total-box .amt{font-size:22px;font-weight:800}
+  .total-box .lbl{font-size:11.5px;opacity:.9;margin-top:2px}
   .grid{
     display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
     padding:16px 14px;
@@ -53,15 +53,18 @@
   .cust:active{transform:scale(.94)}
   .cust.danger{border-color:var(--red)}
   .cust.danger::after{content:"⚠️";position:absolute;top:6px;right:8px;font-size:14px}
+  .cust.advance{border-color:#BFE3C2}
   .face{
     width:64px;height:64px;border-radius:50%;
     margin:0 auto 8px;overflow:hidden;
     border:3px solid var(--line);background:#EEE;
   }
   .cust.danger .face{border-color:var(--red)}
+  .cust.advance .face{border-color:#BFE3C2}
   .face img{width:100%;height:100%;object-fit:cover;display:block}
   .owed{font-size:19px;font-weight:800;color:var(--red)}
   .owed.zero{color:var(--green)}
+  .owed.adv{color:var(--green)}
   .days{font-size:10.5px;color:var(--muted);margin-top:2px}
   .cust.addnew{
     border-style:dashed;border-color:#C9B392;
@@ -86,22 +89,23 @@
   .sheet .face{width:86px;height:86px;border-width:4px}
   .sheet .bal{font-size:34px;font-weight:800;color:var(--red);margin-top:6px}
   .sheet .bal.zero{color:var(--green)}
+  .sheet .bal.adv{color:var(--green)}
   .sheet .bal-lbl{font-size:13px;color:var(--muted);margin-bottom:14px}
   .section-lbl{font-size:14px;font-weight:800;margin:10px 0 8px}
-  .btn-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:6px}
+  .btn-row{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:6px}
   .tea-btn{
     background:var(--red-bg);color:var(--red);
     border:2px solid #F5C6C0;border-radius:14px;
-    padding:14px 4px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;
+    padding:14px 2px;font-size:15.5px;font-weight:800;cursor:pointer;font-family:inherit;
   }
   .tea-btn:active{background:#F9D7D3}
   .pay-btn{
     background:var(--green-bg);color:var(--green);
     border:2px solid #BFE3C2;border-radius:14px;
-    padding:14px 4px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;
+    padding:14px 2px;font-size:15.5px;font-weight:800;cursor:pointer;font-family:inherit;
   }
   .pay-btn:active{background:#D4EED6}
-  .full-pay{grid-column:span 4;font-size:16px}
+  .full-pay{grid-column:span 5;font-size:16px;padding:14px 4px}
   .close-btn{
     width:100%;background:none;border:none;color:var(--muted);
     padding:14px 12px 2px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700;
@@ -124,6 +128,30 @@
   }
   .save-btn:active{background:var(--tea-dark)}
   .save-btn:disabled{opacity:.45}
+  /* ---------- Number pad (for custom amounts like ₹17) ---------- */
+  .pad-display{
+    font-size:40px;font-weight:800;margin:8px 0 14px;min-height:52px;
+  }
+  .pad-display.credit{color:var(--red)}
+  .pad-display.pay{color:var(--green)}
+  .pad-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:9px;
+    max-width:290px;margin:0 auto;
+  }
+  .pad-key{
+    background:#F7EFE2;border:2px solid var(--line);border-radius:16px;
+    padding:16px 0;font-size:22px;font-weight:800;cursor:pointer;font-family:inherit;
+    color:var(--ink);
+  }
+  .pad-key:active{background:#EFE2CC}
+  .pad-ok{
+    width:100%;max-width:290px;margin:14px auto 0;display:block;
+    border:none;border-radius:16px;padding:16px;font-size:17px;font-weight:800;
+    cursor:pointer;font-family:inherit;color:#fff;
+  }
+  .pad-ok.credit{background:var(--red)}
+  .pad-ok.pay{background:var(--green)}
+  .pad-ok:disabled{opacity:.4}
   .toast{
     position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-90px);
     background:var(--ink);color:#fff;padding:11px 20px;border-radius:999px;
@@ -144,8 +172,12 @@
       <div class="lbl">மொத்த பாக்கி</div>
     </div>
     <div class="total-box">
+      <div class="amt" id="totalAdvance">₹0</div>
+      <div class="lbl">முன்பணம்</div>
+    </div>
+    <div class="total-box">
       <div class="amt" id="totalPeople">0</div>
-      <div class="lbl">பாக்கி உள்ளவர்கள்</div>
+      <div class="lbl">பாக்கி உள்ளோர்</div>
     </div>
   </div>
 </header>
@@ -160,14 +192,15 @@
 <div class="sheet" id="custSheet">
   <div class="face" id="dFace"></div>
   <div class="bal" id="dBal">₹0</div>
-  <div class="bal-lbl">பாக்கி</div>
+  <div class="bal-lbl" id="dBalLbl">பாக்கி</div>
 
-  <div class="section-lbl">☕ டீ குடித்தார் — கடன் சேர்</div>
+  <div class="section-lbl">☕ டீ குடித்தார்</div>
   <div class="btn-row">
     <button class="tea-btn" onclick="addCredit(10)">+₹10</button>
     <button class="tea-btn" onclick="addCredit(15)">+₹15</button>
     <button class="tea-btn" onclick="addCredit(20)">+₹20</button>
     <button class="tea-btn" onclick="addCredit(50)">+₹50</button>
+    <button class="tea-btn" onclick="openPad('credit')">வேறு</button>
   </div>
 
   <div class="section-lbl">💵 பணம் வந்தது</div>
@@ -176,11 +209,34 @@
     <button class="pay-btn" onclick="payAmount(20)">₹20</button>
     <button class="pay-btn" onclick="payAmount(50)">₹50</button>
     <button class="pay-btn" onclick="payAmount(100)">₹100</button>
+    <button class="pay-btn" onclick="openPad('pay')">வேறு</button>
     <button class="pay-btn full-pay" onclick="payFull()">✔ முழு பாக்கியும் வந்தது</button>
   </div>
 
   <button class="remove-btn" onclick="removeCustomer()">இந்த நபரை நீக்கு</button>
   <button class="close-btn" onclick="closeAll()">மூடு</button>
+</div>
+
+<!-- Number pad sheet (custom amount, tap-only) -->
+<div class="sheet" id="padSheet">
+  <div class="section-lbl" style="font-size:17px" id="padTitle">வேறு தொகை</div>
+  <div class="pad-display" id="padDisplay">₹0</div>
+  <div class="pad-grid">
+    <button class="pad-key" onclick="padPress(1)">1</button>
+    <button class="pad-key" onclick="padPress(2)">2</button>
+    <button class="pad-key" onclick="padPress(3)">3</button>
+    <button class="pad-key" onclick="padPress(4)">4</button>
+    <button class="pad-key" onclick="padPress(5)">5</button>
+    <button class="pad-key" onclick="padPress(6)">6</button>
+    <button class="pad-key" onclick="padPress(7)">7</button>
+    <button class="pad-key" onclick="padPress(8)">8</button>
+    <button class="pad-key" onclick="padPress(9)">9</button>
+    <button class="pad-key" onclick="padClear()">C</button>
+    <button class="pad-key" onclick="padPress(0)">0</button>
+    <button class="pad-key" onclick="padBack()">⌫</button>
+  </div>
+  <button class="pad-ok" id="padOk" onclick="padConfirm()" disabled>சரி</button>
+  <button class="close-btn" onclick="closePad()">மூடு</button>
 </div>
 
 <!-- Add customer sheet -->
@@ -197,8 +253,7 @@
 
 <script>
 // ==================================================================
-// ⭐ STEP 1: Paste your Apps Script web app link between the quotes.
-// It looks like: https://script.google.com/macros/s/XXXXX/exec
+// Your backend link (already filled in)
 // ==================================================================
 const API_URL = "https://script.google.com/macros/s/AKfycbwCIxM6c68PO0AUOqiDJvC6AupRg26TQmpINT81Kfawdkd_gwXItcKB6IbExl8PII0A/exec";
 
@@ -206,6 +261,11 @@ let customers = [];
 let current = -1;
 let newPhoto = null;
 const DANGER = 200;
+
+// How to read a balance:
+//   owed > 0  → customer owes the shop (பாக்கி, red)
+//   owed < 0  → customer paid in advance (முன்பணம், green)
+//   owed = 0  → all settled (✔)
 
 // ==================================================================
 // Talk to the backend
@@ -222,7 +282,6 @@ async function loadCustomers(){
   }
 }
 
-// Send a save request to the backend (runs quietly in the background)
 function post(payload){
   return fetch(API_URL, {
     method: "POST",
@@ -248,21 +307,40 @@ function daysSince(iso){
 // Render the face grid
 // ==================================================================
 function render(){
-  let total = 0, people = 0;
-  customers.forEach(c => { total += c.owed; if (c.owed > 0) people++; });
-  document.getElementById("totalOwed").textContent = "₹" + total;
+  let totalOwed = 0, totalAdv = 0, people = 0;
+  customers.forEach(c => {
+    if (c.owed > 0){ totalOwed += c.owed; people++; }
+    if (c.owed < 0){ totalAdv += Math.abs(c.owed); }
+  });
+  document.getElementById("totalOwed").textContent = "₹" + totalOwed;
+  document.getElementById("totalAdvance").textContent = "₹" + totalAdv;
   document.getElementById("totalPeople").textContent = people;
 
+  // Biggest debtors first, advances at the end
   const order = customers.map((c,i)=>({c,i})).sort((a,b)=>b.c.owed - a.c.owed);
 
   const grid = document.getElementById("grid");
-  grid.innerHTML = order.map(({c,i}) => `
-    <div class="cust ${c.owed >= DANGER ? 'danger':''}" onclick="openCustomer(${i})">
+  grid.innerHTML = order.map(({c,i}) => {
+    let cls = "", amtCls = "", amtTxt = "", dayTxt = "";
+    if (c.owed > 0){
+      cls = c.owed >= DANGER ? "danger" : "";
+      amtTxt = "₹" + c.owed;
+      dayTxt = daysSince(c.since) + " நாட்கள்";
+    } else if (c.owed < 0){
+      cls = "advance"; amtCls = "adv";
+      amtTxt = "₹" + Math.abs(c.owed);
+      dayTxt = "முன்பணம்";
+    } else {
+      amtCls = "zero"; amtTxt = "✔"; dayTxt = "பாக்கி இல்லை";
+    }
+    return `
+    <div class="cust ${cls}" onclick="openCustomer(${i})">
       <div class="face"><img src="${c.photo}" loading="lazy"></div>
-      <div class="owed ${c.owed===0?'zero':''}">${c.owed===0 ? '✔' : '₹'+c.owed}</div>
-      <div class="days">${c.owed===0 ? 'பாக்கி இல்லை' : daysSince(c.since) + ' நாட்கள்'}</div>
-    </div>`).join("")
-    + `
+      <div class="owed ${amtCls}">${amtTxt}</div>
+      <div class="days">${dayTxt}</div>
+    </div>`;
+  }).join("")
+  + `
     <div class="cust addnew" onclick="openAdd()">
       <div class="plus">＋</div>
       <div class="txt">புது ஆள்</div>
@@ -284,31 +362,47 @@ function openCustomer(i){
 function updateBal(){
   const c = customers[current];
   const el = document.getElementById("dBal");
-  el.textContent = "₹" + c.owed;
-  el.className = "bal" + (c.owed === 0 ? " zero" : "");
+  const lbl = document.getElementById("dBalLbl");
+  if (c.owed > 0){
+    el.textContent = "₹" + c.owed;
+    el.className = "bal";
+    lbl.textContent = "பாக்கி";
+  } else if (c.owed < 0){
+    el.textContent = "₹" + Math.abs(c.owed);
+    el.className = "bal adv";
+    lbl.textContent = "முன்பணம் உள்ளது";
+  } else {
+    el.textContent = "₹0";
+    el.className = "bal zero";
+    lbl.textContent = "பாக்கி இல்லை";
+  }
 }
 
 function addCredit(amt){
   const c = customers[current];
-  if (c.owed === 0) c.since = new Date().toISOString();
+  if (c.owed <= 0 && c.owed + amt > 0) c.since = new Date().toISOString();
   c.owed += amt;
   updateBal(); render();
-  toast("☕ ₹" + amt + " கடன் சேர்ந்தது");
+  toast("☕ ₹" + amt + " சேர்ந்தது");
   post({ action:"credit", id:c.id, amt:amt });
 }
 
 function payAmount(amt){
   const c = customers[current];
-  c.owed = Math.max(0, c.owed - amt);
-  if (c.owed === 0) c.since = "";
+  c.owed -= amt;                       // going below 0 = advance
+  if (c.owed <= 0) c.since = "";
   updateBal(); render();
-  toast("💵 ₹" + amt + " வரவு வைத்தாச்சு");
+  if (c.owed < 0){
+    toast("💵 முன்பணம் ₹" + Math.abs(c.owed) + " உள்ளது");
+  } else {
+    toast("💵 ₹" + amt + " வரவு வைத்தாச்சு");
+  }
   post({ action:"pay", id:c.id, amt:amt });
 }
 
 function payFull(){
   const c = customers[current];
-  if (c.owed === 0){ toast("பாக்கி எதுவும் இல்லை"); return; }
+  if (c.owed <= 0){ toast("பாக்கி எதுவும் இல்லை"); return; }
   const amt = c.owed;
   c.owed = 0; c.since = "";
   updateBal(); render();
@@ -325,7 +419,58 @@ function removeCustomer(){
 }
 
 // ==================================================================
-// Add customer (photo goes to Google Drive via the backend)
+// Number pad — custom amounts like ₹17, tap-only
+// ==================================================================
+let padMode = "credit";   // "credit" or "pay"
+let padValue = 0;
+
+function openPad(mode){
+  padMode = mode;
+  padValue = 0;
+  const disp = document.getElementById("padDisplay");
+  disp.textContent = "₹0";
+  disp.className = "pad-display " + mode;
+  document.getElementById("padTitle").textContent =
+    mode === "credit" ? "☕ வேறு தொகை — கடன்" : "💵 வேறு தொகை — பணம்";
+  const ok = document.getElementById("padOk");
+  ok.className = "pad-ok " + mode;
+  ok.disabled = true;
+  document.getElementById("custSheet").classList.remove("show");
+  document.getElementById("padSheet").classList.add("show");
+}
+
+function padPress(d){
+  if (padValue >= 10000) return;       // sensible limit
+  padValue = padValue * 10 + d;
+  padUpdate();
+}
+function padBack(){
+  padValue = Math.floor(padValue / 10);
+  padUpdate();
+}
+function padClear(){
+  padValue = 0;
+  padUpdate();
+}
+function padUpdate(){
+  document.getElementById("padDisplay").textContent = "₹" + padValue;
+  document.getElementById("padOk").disabled = (padValue === 0);
+}
+
+function padConfirm(){
+  const amt = padValue;
+  closePad();
+  if (padMode === "credit") addCredit(amt);
+  else payAmount(amt);
+}
+
+function closePad(){
+  document.getElementById("padSheet").classList.remove("show");
+  document.getElementById("custSheet").classList.add("show");
+}
+
+// ==================================================================
+// Add customer
 // ==================================================================
 function openAdd(){
   newPhoto = null;
@@ -340,14 +485,12 @@ function photoTaken(input){
   const file = input.files && input.files[0];
   if (!file) return;
 
-  // Shrink the photo before sending — faster upload, less data
   const img = new Image();
   const reader = new FileReader();
   reader.onload = e => { img.src = e.target.result; };
   img.onload = () => {
     const canvas = document.createElement("canvas");
     const size = 300;
-    // Crop to a square from the centre
     const min = Math.min(img.width, img.height);
     canvas.width = size; canvas.height = size;
     canvas.getContext("2d").drawImage(
@@ -388,6 +531,7 @@ function closeAll(){
   document.getElementById("overlay").classList.remove("show");
   document.getElementById("custSheet").classList.remove("show");
   document.getElementById("addSheet").classList.remove("show");
+  document.getElementById("padSheet").classList.remove("show");
 }
 
 let toastTimer;
