@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>டீக்கடை கணக்கு</title>
+<title>Tea Shop Account</title>
 <style>
   :root{
     --tea:#7B3F00;
@@ -20,7 +20,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{
-    font-family:"Noto Sans Tamil",-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-family:-apple-system,"Segoe UI",Roboto,sans-serif;
     background:var(--cream);color:var(--ink);
     max-width:520px;margin:0 auto;min-height:100vh;
     padding-bottom:100px;
@@ -33,6 +33,22 @@
   }
   header h1{font-size:22px;font-weight:800;letter-spacing:.3px}
   header .cup{font-size:26px;margin-right:6px}
+  .shop-banner{
+    display:inline-flex;align-items:center;gap:8px;margin-top:8px;
+    background:rgba(255,255,255,.16);
+    border:1.5px solid rgba(255,255,255,.35);
+    border-radius:999px;padding:4px 16px 4px 5px;
+    font-size:14.5px;font-weight:800;letter-spacing:.3px;
+  }
+  .banner-logo{
+    width:30px;height:30px;border-radius:50%;
+    object-fit:cover;display:block;
+  }
+  .lock-logo{
+    width:110px;height:110px;border-radius:24px;
+    object-fit:cover;margin-bottom:12px;
+    box-shadow:0 6px 20px rgba(0,0,0,.35);
+  }
   .total-bar{display:flex;justify-content:center;gap:12px;margin-top:12px}
   .total-box{
     background:rgba(255,255,255,.14);border-radius:14px;
@@ -46,7 +62,7 @@
   }
   .cust{
     background:var(--card);border-radius:18px;
-    padding:12px 8px 10px;text-align:center;
+    padding:12px 6px 10px;text-align:center;
     border:2px solid var(--line);cursor:pointer;
     transition:transform .1s ease;position:relative;
   }
@@ -54,22 +70,25 @@
   .cust.danger{border-color:var(--red)}
   .cust.danger::after{content:"⚠️";position:absolute;top:6px;right:8px;font-size:14px}
   .cust.advance{border-color:#BFE3C2}
-  .face{
-    width:64px;height:64px;border-radius:50%;
-    margin:0 auto 8px;overflow:hidden;
-    border:3px solid var(--line);background:#EEE;
+  .avatar{
+    width:56px;height:56px;border-radius:50%;
+    margin:0 auto 7px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;font-weight:800;color:#fff;
   }
-  .cust.danger .face{border-color:var(--red)}
-  .cust.advance .face{border-color:#BFE3C2}
-  .face img{width:100%;height:100%;object-fit:cover;display:block}
-  .owed{font-size:19px;font-weight:800;color:var(--red)}
+  .cname{
+    font-size:12.5px;font-weight:700;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    margin-bottom:3px;padding:0 2px;
+  }
+  .owed{font-size:18px;font-weight:800;color:var(--red)}
   .owed.zero{color:var(--green)}
   .owed.adv{color:var(--green)}
   .days{font-size:10.5px;color:var(--muted);margin-top:2px}
   .cust.addnew{
     border-style:dashed;border-color:#C9B392;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    min-height:130px;color:var(--tea);
+    min-height:132px;color:var(--tea);
   }
   .cust.addnew .plus{font-size:34px;font-weight:800;line-height:1}
   .cust.addnew .txt{font-size:13px;font-weight:700;margin-top:6px}
@@ -84,13 +103,15 @@
     width:100%;max-width:520px;background:#fff;z-index:11;
     border-radius:26px 26px 0 0;padding:20px 18px 26px;
     transition:transform .25s ease;text-align:center;
+    max-height:88vh;overflow-y:auto;
   }
   .sheet.show{transform:translate(-50%,0)}
-  .sheet .face{width:86px;height:86px;border-width:4px}
-  .sheet .bal{font-size:34px;font-weight:800;color:var(--red);margin-top:6px}
+  .sheet .avatar{width:74px;height:74px;font-size:32px}
+  .sheet .cust-name{font-size:18px;font-weight:800;margin-top:8px}
+  .sheet .bal{font-size:32px;font-weight:800;color:var(--red);margin-top:4px}
   .sheet .bal.zero{color:var(--green)}
   .sheet .bal.adv{color:var(--green)}
-  .sheet .bal-lbl{font-size:13px;color:var(--muted);margin-bottom:14px}
+  .sheet .bal-lbl{font-size:13px;color:var(--muted);margin-bottom:12px}
   .section-lbl{font-size:14px;font-weight:800;margin:10px 0 8px}
   .btn-row{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:6px}
   .tea-btn{
@@ -106,21 +127,30 @@
   }
   .pay-btn:active{background:#D4EED6}
   .full-pay{grid-column:span 5;font-size:16px;padding:14px 4px}
+  .history-btn{
+    width:100%;margin-top:10px;
+    background:#F7EFE2;color:var(--tea);
+    border:2px solid var(--line);border-radius:14px;
+    padding:13px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;
+  }
+  .history-btn:active{background:#EFE2CC}
   .close-btn{
     width:100%;background:none;border:none;color:var(--muted);
     padding:14px 12px 2px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:700;
   }
   .remove-btn{
     background:none;border:none;color:#B99;font-size:12.5px;
-    margin-top:10px;cursor:pointer;font-family:inherit;text-decoration:underline;
+    margin-top:8px;cursor:pointer;font-family:inherit;text-decoration:underline;
   }
-  .cam-box{
-    width:120px;height:120px;border-radius:50%;margin:6px auto 14px;
-    border:3px dashed #C9B392;display:flex;align-items:center;justify-content:center;
-    font-size:40px;background:#FBF3E6;cursor:pointer;overflow:hidden;
+  /* ---------- Add customer form ---------- */
+  .field{margin-bottom:13px;text-align:left}
+  .field label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:5px}
+  .field input{
+    width:100%;padding:13px 12px;border:2px solid var(--line);
+    border-radius:12px;font-size:16px;outline:none;background:#FBF7EF;
+    font-family:inherit;
   }
-  .cam-box img{width:100%;height:100%;object-fit:cover}
-  .cam-hint{font-size:13.5px;color:var(--muted);margin-bottom:14px}
+  .field input:focus{border-color:var(--tea);background:#fff}
   .save-btn{
     width:100%;background:var(--tea);color:#fff;border:none;
     border-radius:14px;padding:15px;font-size:17px;font-weight:800;
@@ -128,10 +158,8 @@
   }
   .save-btn:active{background:var(--tea-dark)}
   .save-btn:disabled{opacity:.45}
-  /* ---------- Number pad (for custom amounts like ₹17) ---------- */
-  .pad-display{
-    font-size:40px;font-weight:800;margin:8px 0 14px;min-height:52px;
-  }
+  /* ---------- Number pad ---------- */
+  .pad-display{font-size:40px;font-weight:800;margin:8px 0 14px;min-height:52px}
   .pad-display.credit{color:var(--red)}
   .pad-display.pay{color:var(--green)}
   .pad-grid{
@@ -152,10 +180,89 @@
   .pad-ok.credit{background:var(--red)}
   .pad-ok.pay{background:var(--green)}
   .pad-ok:disabled{opacity:.4}
+  /* ---------- Voice note prompt ---------- */
+  .mic-circle{
+    width:96px;height:96px;border-radius:50%;margin:10px auto 12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:42px;cursor:pointer;
+    background:var(--red-bg);border:3px solid #F5C6C0;
+  }
+  .mic-circle.recording{
+    background:var(--red);border-color:var(--red);
+    animation:pulse 1s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(198,40,40,.45)}
+    50%{box-shadow:0 0 0 16px rgba(198,40,40,0)}
+  }
+  .rec-timer{font-size:15px;font-weight:800;color:var(--red);min-height:22px;margin-bottom:8px}
+  .voice-actions{display:flex;gap:9px;margin-top:10px}
+  .voice-actions button{
+    flex:1;border-radius:14px;padding:14px 4px;font-size:15px;font-weight:800;
+    cursor:pointer;font-family:inherit;border:none;
+  }
+  .v-save{background:var(--green);color:#fff}
+  .v-skip{background:#F1E9DB;color:var(--muted)}
+  .v-save:disabled{opacity:.4}
+  /* ---------- History list ---------- */
+  .hist-list{text-align:left;margin-top:6px}
+  .hist-item{
+    display:flex;align-items:center;gap:10px;
+    padding:11px 6px;border-bottom:1.5px solid var(--line);
+  }
+  .hist-date{font-size:12px;color:var(--muted);width:82px;flex-shrink:0}
+  .hist-amt{flex:1;font-size:16px;font-weight:800}
+  .hist-amt.credit{color:var(--red)}
+  .hist-amt.pay{color:var(--green)}
+  .hist-play{
+    width:44px;height:44px;border-radius:50%;border:none;
+    background:var(--tea);color:#fff;font-size:17px;cursor:pointer;
+    flex-shrink:0;
+  }
+  .hist-play:disabled{opacity:.5}
+  .hist-empty{color:var(--muted);font-size:14px;padding:26px 0}
+  /* ---------- PIN lock screen ---------- */
+  .lock{
+    position:fixed;inset:0;z-index:50;
+    background:var(--tea);color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:20px;
+    max-width:520px;margin:0 auto;
+  }
+  .lock.hidden{display:none}
+  .lock .big-cup{font-size:52px;margin-bottom:8px}
+  .lock h2{font-size:22px;font-weight:800}
+  .lock .shopname{
+    margin-top:8px;background:rgba(255,255,255,.16);
+    border:1.5px solid rgba(255,255,255,.35);
+    border-radius:999px;padding:6px 18px;
+    font-size:15px;font-weight:800;
+  }
+  .lock .hint{font-size:13.5px;opacity:.85;margin:18px 0 14px}
+  .pin-dots{display:flex;gap:16px;margin-bottom:22px}
+  .dot{
+    width:16px;height:16px;border-radius:50%;
+    border:2.5px solid rgba(255,255,255,.7);background:transparent;
+    transition:background .1s;
+  }
+  .dot.on{background:#fff;border-color:#fff}
+  .pin-dots.shake{animation:shake .4s}
+  @keyframes shake{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-9px)}
+    40%{transform:translateX(9px)}
+    60%{transform:translateX(-6px)}
+    80%{transform:translateX(6px)}
+  }
+  .lock .pad-grid .pad-key{
+    background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff;
+  }
+  .lock .pad-key:active{background:rgba(255,255,255,.28)}
+  .lock .err-msg{height:20px;font-size:14px;font-weight:700;color:#FFD3D3;margin-top:14px}
   .toast{
     position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-90px);
     background:var(--ink);color:#fff;padding:11px 20px;border-radius:999px;
-    font-size:15px;font-weight:700;z-index:20;transition:transform .25s ease;
+    font-size:15px;font-weight:700;z-index:60;transition:transform .25s ease;
     white-space:nowrap;
   }
   .toast.show{transform:translateX(-50%) translateY(0)}
@@ -164,62 +271,116 @@
 </head>
 <body>
 
+<!-- ================= PIN LOCK SCREEN ================= -->
+<div class="lock" id="lock">
+  <img class="lock-logo" src="data:image/jpeg;base64,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" alt="logo">
+  <h2>Tea Shop Account</h2>
+  <div class="shopname" id="lockShopName"></div>
+  <div class="hint">Enter your secret PIN</div>
+  <div class="pin-dots" id="pinDots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="pad-grid">
+    <button class="pad-key" onclick="pinPress(1)">1</button>
+    <button class="pad-key" onclick="pinPress(2)">2</button>
+    <button class="pad-key" onclick="pinPress(3)">3</button>
+    <button class="pad-key" onclick="pinPress(4)">4</button>
+    <button class="pad-key" onclick="pinPress(5)">5</button>
+    <button class="pad-key" onclick="pinPress(6)">6</button>
+    <button class="pad-key" onclick="pinPress(7)">7</button>
+    <button class="pad-key" onclick="pinPress(8)">8</button>
+    <button class="pad-key" onclick="pinPress(9)">9</button>
+    <button class="pad-key" style="visibility:hidden"></button>
+    <button class="pad-key" onclick="pinPress(0)">0</button>
+    <button class="pad-key" onclick="pinBack()">⌫</button>
+  </div>
+  <div class="err-msg" id="pinErr"></div>
+</div>
+
+<!-- ================= MAIN APP ================= -->
 <header>
-  <h1><span class="cup">☕</span>டீக்கடை கணக்கு</h1>
+  <h1><span class="cup">☕</span>Tea Shop Account</h1>
+  <div class="shop-banner"><img class="banner-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGiEcFxgfGRQUHScdHyIjJSUlFhwpLCgkKyEkJST/2wBDAQYGBgkICREJCREkGBQYJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCT/wAARCABIAEgDASIAAhEBAxEB/8QAHAABAAICAwEAAAAAAAAAAAAAAAcIAQUCAwYJ/8QAORAAAQMCBAMFBAcJAAAAAAAAAQACAwQRBQYHEhQhMQgTFRYiIzJBURcYUmFxcoImNDZCQ4Gxs8T/xAAXAQEBAQEAAAAAAAAAAAAAAAAABAIF/8QAIhEAAgICAQMFAAAAAAAAAAAAAAECAwQRIQUSQTFRUnGx/9oADAMBAAIRAxEAPwCqiIiAIiIAiIgCIiAIiIAiIgCIpS7PGlp1Nz5DHVwl+DYZtqq8kel4B9EX6yLflDkB6X6ttZ9A/nLupvMF/EeG5/uO33dv27e0/Dl1UEL6GbdSfpb77w6k8jcLwXdcUzdf3uI2fPd6Nv2fvVRe0PpadMs+TR0cJZg2J7qqgIHpYCfXF+gm35S1ARaiIgCIiAIiIDKsfRZ0qdGtG6LL+G5bzDhGPZkcHuxeaOJrZC7budCWvLrtY5rWXA5u3cjyUJ5YwHjKHEsTnZeGmppRGD/NJsP+Ov42U/8AaRb+yWkVh/Tb/rp1hTUm4rwVW4tlNdd01xPbX0uDS21U8a8F73U7xHh+L4fxT1dzu2b/AH+m7kvU5roM5agaRxZWzVkDNdVmOgeX0OKtjgcHlps0ykyB13MO19geYDuZ5KXrD6wPQfwp/wBq0VJlPXOjxQVbtRMvV1O17iKSqw72b2m9g4sa13Ll0cOiQh2+WMnLd6ScIx18Vr8KITwS000kE0b4pY3Fj2PFnNcDYgj4G661NvaR0qzNlnFvOWLtwaSPGJy2c4TFJHDFPtBuWyEkF9nOvexId0UJLZKEREAXKNofI1pe1gJALndB95XFECJSoceytQYWzDW18T4GxmNwLH+u/vE8vjcqYdNtY9OMVylheCah4pA+ryxWslw2pmhld3zGD2MnpafU0HaQeu0HmqmLN1PTjqptpt7Oz1PrU8+uFc64x7OFrfp7ct8FisH1QyDqRq9j2O6jmnbgDaPhsIiqmSuEbWyDbyj5hzgXON/i63wC2bsu9mNzi4Z2xZoJuA2eew+4eyVYkufmVQcYuXLnLQl+mdVp954knwyWN7YZKuOeWSncTuaWnux7r/UB/boqc1cLKaqmhZPHUMje5gljvtkANtwuAbHrzC6rn5lYQBERAEREAREQBERAEREAREQH/9k=" alt=""><span id="shopBanner"></span></div>
   <div class="total-bar">
     <div class="total-box">
       <div class="amt" id="totalOwed">₹0</div>
-      <div class="lbl">மொத்த பாக்கி</div>
+      <div class="lbl">TOTAL PENDING</div>
     </div>
     <div class="total-box">
       <div class="amt" id="totalAdvance">₹0</div>
-      <div class="lbl">முன்பணம்</div>
+      <div class="lbl">ADVANCE</div>
     </div>
     <div class="total-box">
       <div class="amt" id="totalPeople">0</div>
-      <div class="lbl">பாக்கி உள்ளோர்</div>
+      <div class="lbl">PEOPLE PENDING</div>
     </div>
   </div>
 </header>
 
 <div class="grid" id="grid">
-  <div class="loading-box">⏳ கணக்கு வருகிறது…</div>
+  <div class="loading-box">🔒 Waiting for PIN…</div>
 </div>
 
-<!-- Customer detail sheet -->
 <div class="overlay" id="overlay" onclick="closeAll()"></div>
 
+<!-- Customer detail sheet -->
 <div class="sheet" id="custSheet">
-  <div class="face" id="dFace"></div>
+  <div class="avatar" id="dAvatar">A</div>
+  <div class="cust-name" id="dName"></div>
   <div class="bal" id="dBal">₹0</div>
-  <div class="bal-lbl" id="dBalLbl">பாக்கி</div>
+  <div class="bal-lbl" id="dBalLbl">Pending</div>
 
-  <div class="section-lbl">☕ டீ குடித்தார்</div>
+  <div class="section-lbl">☕ Ate / Drank — Add Credit</div>
   <div class="btn-row">
     <button class="tea-btn" onclick="addCredit(10)">+₹10</button>
     <button class="tea-btn" onclick="addCredit(15)">+₹15</button>
     <button class="tea-btn" onclick="addCredit(20)">+₹20</button>
     <button class="tea-btn" onclick="addCredit(50)">+₹50</button>
-    <button class="tea-btn" onclick="openPad('credit')">வேறு</button>
+    <button class="tea-btn" onclick="openPad('credit')">Other</button>
   </div>
 
-  <div class="section-lbl">💵 பணம் வந்தது</div>
+  <div class="section-lbl">💵 Payment Received</div>
   <div class="btn-row">
     <button class="pay-btn" onclick="payAmount(10)">₹10</button>
     <button class="pay-btn" onclick="payAmount(20)">₹20</button>
     <button class="pay-btn" onclick="payAmount(50)">₹50</button>
     <button class="pay-btn" onclick="payAmount(100)">₹100</button>
-    <button class="pay-btn" onclick="openPad('pay')">வேறு</button>
-    <button class="pay-btn full-pay" onclick="payFull()">✔ முழு பாக்கியும் வந்தது</button>
+    <button class="pay-btn" onclick="openPad('pay')">Other</button>
+    <button class="pay-btn full-pay" onclick="payFull()">✔ Full Amount Received</button>
   </div>
 
-  <button class="remove-btn" onclick="removeCustomer()">இந்த நபரை நீக்கு</button>
-  <button class="close-btn" onclick="closeAll()">மூடு</button>
+  <button class="history-btn" onclick="openHistory()">📖 View History</button>
+
+  <button class="remove-btn" onclick="removeCustomer()">Remove this person</button>
+  <button class="close-btn" onclick="closeAll()">Close</button>
 </div>
 
-<!-- Number pad sheet (custom amount, tap-only) -->
+<!-- Voice note prompt (appears after a credit is added) -->
+<div class="sheet" id="voiceSheet">
+  <div class="section-lbl" style="font-size:17px">🎤 Add a voice note?</div>
+  <div style="font-size:13.5px;color:var(--muted)">
+    Say what they had — e.g. "2 tea 1 biscuit"
+  </div>
+  <div class="mic-circle" id="micBtn" onclick="toggleRecord()">🎤</div>
+  <div class="rec-timer" id="recTimer"></div>
+  <div class="voice-actions">
+    <button class="v-save" id="vSave" onclick="saveVoice()" disabled>Save</button>
+    <button class="v-skip" onclick="skipVoice()">Skip</button>
+  </div>
+</div>
+
+<!-- History sheet -->
+<div class="sheet" id="histSheet">
+  <div class="section-lbl" style="font-size:17px" id="histTitle">📖 History</div>
+  <div class="hist-list" id="histList">
+    <div class="hist-empty">⏳ Loading…</div>
+  </div>
+  <button class="close-btn" onclick="closeHistory()">Close</button>
+</div>
+
+<!-- Number pad sheet -->
 <div class="sheet" id="padSheet">
-  <div class="section-lbl" style="font-size:17px" id="padTitle">வேறு தொகை</div>
+  <div class="section-lbl" style="font-size:17px" id="padTitle">Other Amount</div>
   <div class="pad-display" id="padDisplay">₹0</div>
   <div class="pad-grid">
     <button class="pad-key" onclick="padPress(1)">1</button>
@@ -235,54 +396,109 @@
     <button class="pad-key" onclick="padPress(0)">0</button>
     <button class="pad-key" onclick="padBack()">⌫</button>
   </div>
-  <button class="pad-ok" id="padOk" onclick="padConfirm()" disabled>சரி</button>
-  <button class="close-btn" onclick="closePad()">மூடு</button>
+  <button class="pad-ok" id="padOk" onclick="padConfirm()" disabled>OK</button>
+  <button class="close-btn" onclick="closePad()">Close</button>
 </div>
 
 <!-- Add customer sheet -->
 <div class="sheet" id="addSheet">
-  <div class="section-lbl" style="font-size:17px">புது ஆள் சேர்</div>
-  <div class="cam-box" id="camBox" onclick="document.getElementById('camInput').click()">📷</div>
-  <div class="cam-hint">மேலே தட்டி புகைப்படம் எடுக்கவும்</div>
-  <input type="file" id="camInput" accept="image/*" capture="user" style="display:none" onchange="photoTaken(this)">
-  <button class="save-btn" id="saveNew" onclick="saveCustomer()" disabled>சேமி</button>
-  <button class="close-btn" onclick="closeAll()">மூடு</button>
+  <div class="section-lbl" style="font-size:17px">Add New Person</div>
+  <div class="field">
+    <label>Name *</label>
+    <input type="text" id="fName" placeholder="e.g. Murugan anna" autocomplete="off">
+  </div>
+  <div class="field">
+    <label>Phone number (optional)</label>
+    <input type="tel" id="fPhone" placeholder="e.g. 98765 43210" autocomplete="off">
+  </div>
+  <button class="save-btn" id="saveNew" onclick="saveCustomer()">Save</button>
+  <button class="close-btn" onclick="closeAll()">Close</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 // ==================================================================
-// Your backend link (already filled in)
+// ⭐ SETTINGS — the only two lines you change per shop ⭐
 // ==================================================================
-const API_URL = "https://script.google.com/macros/s/AKfycbwCIxM6c68PO0AUOqiDJvC6AupRg26TQmpINT81Kfawdkd_gwXItcKB6IbExl8PII0A/exec";
+const API_URL   = "https://script.google.com/macros/s/AKfycbwCIxM6c68PO0AUOqiDJvC6AupRg26TQmpINT81Kfawdkd_gwXItcKB6IbExl8PII0A/exec";
+const SHOP_NAME = "AVS Tea Shop";   // ← change if the shop name is different
 
 let customers = [];
 let current = -1;
-let newPhoto = null;
+let shopPin = "";
 const DANGER = 200;
 
-// How to read a balance:
-//   owed > 0  → customer owes the shop (பாக்கி, red)
-//   owed < 0  → customer paid in advance (முன்பணம், green)
-//   owed = 0  → all settled (✔)
+document.getElementById("shopBanner").textContent = SHOP_NAME;
+document.getElementById("lockShopName").textContent = SHOP_NAME;
+
+// Colors for the letter circles (picked by name, stays same every time)
+const AVATAR_COLORS = ["#C0632F","#2E7D5B","#8E44AD","#2563A8","#C2185B","#00838F","#E65100","#5D4037"];
+function avatarColor(name){
+  let sum = 0;
+  for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
+  return AVATAR_COLORS[sum % AVATAR_COLORS.length];
+}
+function initialOf(name){
+  return (name || "?").trim().charAt(0).toUpperCase();
+}
+
+// ==================================================================
+// PIN lock screen
+// ==================================================================
+let pinEntry = "";
+let pinBusy = false;
+
+function pinPress(d){
+  if (pinBusy || pinEntry.length >= 4) return;
+  pinEntry += d;
+  drawDots();
+  if (pinEntry.length === 4) tryPin();
+}
+function pinBack(){
+  if (pinBusy) return;
+  pinEntry = pinEntry.slice(0,-1);
+  drawDots();
+  document.getElementById("pinErr").textContent = "";
+}
+function drawDots(){
+  const dots = document.querySelectorAll("#pinDots .dot");
+  dots.forEach((dot,i) => dot.classList.toggle("on", i < pinEntry.length));
+}
+async function tryPin(){
+  pinBusy = true;
+  document.getElementById("pinErr").textContent = "⏳ Checking…";
+  try{
+    const res = await fetch(API_URL + "?pin=" + encodeURIComponent(pinEntry));
+    const data = await res.json();
+    if (data.ok){
+      shopPin = pinEntry;
+      customers = data.customers || [];
+      document.getElementById("lock").classList.add("hidden");
+      render();
+    } else {
+      wrongPin();
+    }
+  }catch(err){
+    document.getElementById("pinErr").textContent = "😕 No connection — check internet";
+    pinEntry = ""; drawDots();
+  }
+  pinBusy = false;
+}
+function wrongPin(){
+  const dotsBox = document.getElementById("pinDots");
+  dotsBox.classList.add("shake");
+  setTimeout(() => dotsBox.classList.remove("shake"), 450);
+  document.getElementById("pinErr").textContent = "❌ Wrong PIN — try again";
+  pinEntry = "";
+  drawDots();
+}
 
 // ==================================================================
 // Talk to the backend
 // ==================================================================
-async function loadCustomers(){
-  try{
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    customers = data.customers || [];
-    render();
-  }catch(err){
-    document.getElementById("grid").innerHTML =
-      '<div class="loading-box">😕 இணைப்பு இல்லை.<br>Internet-ஐ சரிபார்க்கவும்.</div>';
-  }
-}
-
 function post(payload){
+  payload.pin = shopPin;
   return fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -290,21 +506,18 @@ function post(payload){
   })
   .then(r => r.json())
   .catch(() => {
-    toast("😕 சேமிக்க முடியவில்லை — internet சரிபார்க்கவும்", true);
+    toast("😕 Could not save — check internet", true);
     return { ok:false };
   });
 }
 
-// ==================================================================
-// Helpers
-// ==================================================================
 function daysSince(iso){
   if (!iso) return 0;
   return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
 }
 
 // ==================================================================
-// Render the face grid
+// Render the grid
 // ==================================================================
 function render(){
   let totalOwed = 0, totalAdv = 0, people = 0;
@@ -316,7 +529,6 @@ function render(){
   document.getElementById("totalAdvance").textContent = "₹" + totalAdv;
   document.getElementById("totalPeople").textContent = people;
 
-  // Biggest debtors first, advances at the end
   const order = customers.map((c,i)=>({c,i})).sort((a,b)=>b.c.owed - a.c.owed);
 
   const grid = document.getElementById("grid");
@@ -325,17 +537,18 @@ function render(){
     if (c.owed > 0){
       cls = c.owed >= DANGER ? "danger" : "";
       amtTxt = "₹" + c.owed;
-      dayTxt = daysSince(c.since) + " நாட்கள்";
+      dayTxt = daysSince(c.since) + " days";
     } else if (c.owed < 0){
       cls = "advance"; amtCls = "adv";
       amtTxt = "₹" + Math.abs(c.owed);
-      dayTxt = "முன்பணம்";
+      dayTxt = "Advance";
     } else {
-      amtCls = "zero"; amtTxt = "✔"; dayTxt = "பாக்கி இல்லை";
+      amtCls = "zero"; amtTxt = "✔"; dayTxt = "No pending";
     }
     return `
     <div class="cust ${cls}" onclick="openCustomer(${i})">
-      <div class="face"><img src="${c.photo}" loading="lazy"></div>
+      <div class="avatar" style="background:${avatarColor(c.name)}">${initialOf(c.name)}</div>
+      <div class="cname">${c.name}</div>
       <div class="owed ${amtCls}">${amtTxt}</div>
       <div class="days">${dayTxt}</div>
     </div>`;
@@ -343,7 +556,7 @@ function render(){
   + `
     <div class="cust addnew" onclick="openAdd()">
       <div class="plus">＋</div>
-      <div class="txt">புது ஆள்</div>
+      <div class="txt">New Person</div>
     </div>`;
 }
 
@@ -353,7 +566,10 @@ function render(){
 function openCustomer(i){
   current = i;
   const c = customers[i];
-  document.getElementById("dFace").innerHTML = `<img src="${c.photo}">`;
+  const av = document.getElementById("dAvatar");
+  av.textContent = initialOf(c.name);
+  av.style.background = avatarColor(c.name);
+  document.getElementById("dName").textContent = c.name;
   updateBal();
   document.getElementById("overlay").classList.add("show");
   document.getElementById("custSheet").classList.add("show");
@@ -366,47 +582,50 @@ function updateBal(){
   if (c.owed > 0){
     el.textContent = "₹" + c.owed;
     el.className = "bal";
-    lbl.textContent = "பாக்கி";
+    lbl.textContent = "Pending";
   } else if (c.owed < 0){
     el.textContent = "₹" + Math.abs(c.owed);
     el.className = "bal adv";
-    lbl.textContent = "முன்பணம் உள்ளது";
+    lbl.textContent = "Advance balance";
   } else {
     el.textContent = "₹0";
     el.className = "bal zero";
-    lbl.textContent = "பாக்கி இல்லை";
+    lbl.textContent = "No pending";
   }
 }
+
+// -------- credit + voice note flow --------
+let lastCreditPromise = null;   // remembers the save that a voice note attaches to
 
 function addCredit(amt){
   const c = customers[current];
   if (c.owed <= 0 && c.owed + amt > 0) c.since = new Date().toISOString();
   c.owed += amt;
   updateBal(); render();
-  toast("☕ ₹" + amt + " சேர்ந்தது");
-  post({ action:"credit", id:c.id, amt:amt });
+  lastCreditPromise = post({ action:"credit", id:c.id, amt:amt });
+  openVoicePrompt();            // "add a voice note?" appears right after
 }
 
 function payAmount(amt){
   const c = customers[current];
-  c.owed -= amt;                       // going below 0 = advance
+  c.owed -= amt;
   if (c.owed <= 0) c.since = "";
   updateBal(); render();
   if (c.owed < 0){
-    toast("💵 முன்பணம் ₹" + Math.abs(c.owed) + " உள்ளது");
+    toast("💵 Advance now ₹" + Math.abs(c.owed));
   } else {
-    toast("💵 ₹" + amt + " வரவு வைத்தாச்சு");
+    toast("💵 ₹" + amt + " received");
   }
   post({ action:"pay", id:c.id, amt:amt });
 }
 
 function payFull(){
   const c = customers[current];
-  if (c.owed <= 0){ toast("பாக்கி எதுவும் இல்லை"); return; }
+  if (c.owed <= 0){ toast("Nothing pending"); return; }
   const amt = c.owed;
   c.owed = 0; c.since = "";
   updateBal(); render();
-  toast("✔ ₹" + amt + " முழுசும் வந்தது!");
+  toast("✔ ₹" + amt + " fully paid!");
   post({ action:"payfull", id:c.id });
 }
 
@@ -414,14 +633,189 @@ function removeCustomer(){
   const c = customers[current];
   customers.splice(current,1);
   closeAll(); render();
-  toast("நபர் நீக்கப்பட்டார்");
+  toast("Person removed");
   post({ action:"remove", id:c.id });
 }
 
 // ==================================================================
-// Number pad — custom amounts like ₹17, tap-only
+// Voice notes
 // ==================================================================
-let padMode = "credit";   // "credit" or "pay"
+let mediaRecorder = null;
+let recChunks = [];
+let recordedAudio = null;    // base64 data URL of the finished recording
+let recTimerInt = null;
+let recSeconds = 0;
+
+function openVoicePrompt(){
+  recordedAudio = null;
+  document.getElementById("micBtn").classList.remove("recording");
+  document.getElementById("micBtn").textContent = "🎤";
+  document.getElementById("recTimer").textContent = "";
+  document.getElementById("vSave").disabled = true;
+  document.getElementById("custSheet").classList.remove("show");
+  document.getElementById("voiceSheet").classList.add("show");
+}
+
+async function toggleRecord(){
+  const btn = document.getElementById("micBtn");
+
+  // ---- stop recording ----
+  if (mediaRecorder && mediaRecorder.state === "recording"){
+    mediaRecorder.stop();
+    return;
+  }
+
+  // ---- start recording ----
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "audio/mp4";
+    mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+    recChunks = [];
+
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      clearInterval(recTimerInt);
+      btn.classList.remove("recording");
+      btn.textContent = "🎤";
+      const blob = new Blob(recChunks, { type: mime });
+      const reader = new FileReader();
+      reader.onload = e => {
+        recordedAudio = e.target.result;
+        document.getElementById("recTimer").textContent = "✔ Recorded (" + recSeconds + " sec)";
+        document.getElementById("vSave").disabled = false;
+      };
+      reader.readAsDataURL(blob);
+    };
+
+    mediaRecorder.start();
+    btn.classList.add("recording");
+    btn.textContent = "⏹";
+    recSeconds = 0;
+    document.getElementById("recTimer").textContent = "🔴 Speak… 0 sec";
+    recTimerInt = setInterval(() => {
+      recSeconds++;
+      document.getElementById("recTimer").textContent = "🔴 Speak… " + recSeconds + " sec";
+      if (recSeconds >= 30) mediaRecorder.stop();   // 30-second cap keeps files tiny
+    }, 1000);
+
+  }catch(err){
+    toast("😕 Microphone permission needed — tap Allow", true);
+  }
+}
+
+async function saveVoice(){
+  const btn = document.getElementById("vSave");
+  btn.disabled = true;
+  btn.textContent = "Saving…";
+
+  // Wait for the credit entry to finish saving so we know its row number
+  const creditRes = await lastCreditPromise;
+
+  if (creditRes && creditRes.ok && creditRes.logRow){
+    const res = await post({ action:"voicenote", row:creditRes.logRow, audio:recordedAudio });
+    btn.textContent = "Save";
+    if (res.ok){
+      toast("🎤 Voice note saved");
+      closeVoicePrompt();
+      return;
+    }
+  }
+  btn.textContent = "Save";
+  btn.disabled = false;
+  toast("😕 Could not save — try again", true);
+}
+
+function skipVoice(){
+  if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+  closeVoicePrompt();
+}
+
+function closeVoicePrompt(){
+  document.getElementById("voiceSheet").classList.remove("show");
+  document.getElementById("custSheet").classList.add("show");
+  toast("☕ Entry added");
+}
+
+// ==================================================================
+// History (with voice playback)
+// ==================================================================
+let playingAudio = null;
+
+async function openHistory(){
+  const c = customers[current];
+  document.getElementById("histTitle").textContent = "📖 " + c.name + " — History";
+  document.getElementById("histList").innerHTML = '<div class="hist-empty">⏳ Loading…</div>';
+  document.getElementById("custSheet").classList.remove("show");
+  document.getElementById("histSheet").classList.add("show");
+
+  try{
+    const res = await fetch(API_URL + "?pin=" + encodeURIComponent(shopPin) + "&history=" + encodeURIComponent(c.id));
+    const data = await res.json();
+    const list = document.getElementById("histList");
+
+    if (!data.ok || !data.entries || data.entries.length === 0){
+      list.innerHTML = '<div class="hist-empty">No entries yet</div>';
+      return;
+    }
+
+    list.innerHTML = data.entries.map((en, idx) => {
+      const d = en.time ? new Date(en.time) : null;
+      const dateTxt = d ? (d.getDate() + "/" + (d.getMonth()+1) + " " +
+        d.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit"})) : "";
+      const isCredit = en.type === "CREDIT";
+      const amtTxt = (isCredit ? "+₹" : "−₹") + en.amt +
+        (isCredit ? " credit" : (en.type === "PAYMENT-FULL" ? " (full)" : " payment"));
+      const playBtn = en.voice
+        ? `<button class="hist-play" id="play${idx}" onclick="playVoice('${en.voice}','play${idx}')">▶</button>`
+        : "";
+      return `
+      <div class="hist-item">
+        <div class="hist-date">${dateTxt}</div>
+        <div class="hist-amt ${isCredit ? 'credit' : 'pay'}">${amtTxt}</div>
+        ${playBtn}
+      </div>`;
+    }).join("");
+
+  }catch(err){
+    document.getElementById("histList").innerHTML =
+      '<div class="hist-empty">😕 No connection</div>';
+  }
+}
+
+async function playVoice(fileId, btnId){
+  const btn = document.getElementById(btnId);
+  if (playingAudio){ playingAudio.pause(); playingAudio = null; }
+  btn.disabled = true;
+  btn.textContent = "⏳";
+  try{
+    const res = await fetch(API_URL + "?pin=" + encodeURIComponent(shopPin) + "&voice=" + encodeURIComponent(fileId));
+    const data = await res.json();
+    if (data.ok && data.audio){
+      playingAudio = new Audio(data.audio);
+      btn.textContent = "🔊";
+      playingAudio.onended = () => { btn.textContent = "▶"; btn.disabled = false; };
+      playingAudio.play();
+    } else {
+      throw new Error("no audio");
+    }
+  }catch(err){
+    btn.textContent = "▶";
+    btn.disabled = false;
+    toast("😕 Voice not found", true);
+  }
+}
+
+function closeHistory(){
+  if (playingAudio){ playingAudio.pause(); playingAudio = null; }
+  document.getElementById("histSheet").classList.remove("show");
+  document.getElementById("custSheet").classList.add("show");
+}
+
+// ==================================================================
+// Number pad — custom amounts
+// ==================================================================
+let padMode = "credit";
 let padValue = 0;
 
 function openPad(mode){
@@ -431,96 +825,69 @@ function openPad(mode){
   disp.textContent = "₹0";
   disp.className = "pad-display " + mode;
   document.getElementById("padTitle").textContent =
-    mode === "credit" ? "☕ வேறு தொகை — கடன்" : "💵 வேறு தொகை — பணம்";
+    mode === "credit" ? "☕ Other amount — Credit" : "💵 Other amount — Payment";
   const ok = document.getElementById("padOk");
   ok.className = "pad-ok " + mode;
   ok.disabled = true;
   document.getElementById("custSheet").classList.remove("show");
   document.getElementById("padSheet").classList.add("show");
 }
-
 function padPress(d){
-  if (padValue >= 10000) return;       // sensible limit
+  if (padValue >= 10000) return;
   padValue = padValue * 10 + d;
   padUpdate();
 }
-function padBack(){
-  padValue = Math.floor(padValue / 10);
-  padUpdate();
-}
-function padClear(){
-  padValue = 0;
-  padUpdate();
-}
+function padBack(){ padValue = Math.floor(padValue / 10); padUpdate(); }
+function padClear(){ padValue = 0; padUpdate(); }
 function padUpdate(){
   document.getElementById("padDisplay").textContent = "₹" + padValue;
   document.getElementById("padOk").disabled = (padValue === 0);
 }
-
 function padConfirm(){
   const amt = padValue;
-  closePad();
-  if (padMode === "credit") addCredit(amt);
-  else payAmount(amt);
+  document.getElementById("padSheet").classList.remove("show");
+  if (padMode === "credit"){
+    addCredit(amt);           // voice prompt opens from inside addCredit
+  } else {
+    document.getElementById("custSheet").classList.add("show");
+    payAmount(amt);
+  }
 }
-
 function closePad(){
   document.getElementById("padSheet").classList.remove("show");
   document.getElementById("custSheet").classList.add("show");
 }
 
 // ==================================================================
-// Add customer
+// Add customer (name + optional phone)
 // ==================================================================
 function openAdd(){
-  newPhoto = null;
-  document.getElementById("camBox").innerHTML = "📷";
-  document.getElementById("saveNew").disabled = true;
-  document.getElementById("camInput").value = "";
+  document.getElementById("fName").value = "";
+  document.getElementById("fPhone").value = "";
   document.getElementById("overlay").classList.add("show");
   document.getElementById("addSheet").classList.add("show");
 }
 
-function photoTaken(input){
-  const file = input.files && input.files[0];
-  if (!file) return;
-
-  const img = new Image();
-  const reader = new FileReader();
-  reader.onload = e => { img.src = e.target.result; };
-  img.onload = () => {
-    const canvas = document.createElement("canvas");
-    const size = 300;
-    const min = Math.min(img.width, img.height);
-    canvas.width = size; canvas.height = size;
-    canvas.getContext("2d").drawImage(
-      img,
-      (img.width - min)/2, (img.height - min)/2, min, min,
-      0, 0, size, size
-    );
-    newPhoto = canvas.toDataURL("image/jpeg", 0.8);
-    document.getElementById("camBox").innerHTML = `<img src="${newPhoto}">`;
-    document.getElementById("saveNew").disabled = false;
-  };
-  reader.readAsDataURL(file);
-}
-
 async function saveCustomer(){
+  const name = document.getElementById("fName").value.trim();
+  const phone = document.getElementById("fPhone").value.trim();
+  if (!name){ toast("Name required", true); return; }
+
   const btn = document.getElementById("saveNew");
   btn.disabled = true;
-  btn.textContent = "சேமிக்கிறது…";
+  btn.textContent = "Saving…";
 
-  const res = await post({ action:"add", photo:newPhoto });
+  const res = await post({ action:"add", name:name, phone:phone });
 
-  btn.textContent = "சேமி";
+  btn.textContent = "Save";
+  btn.disabled = false;
 
   if (res.ok && res.customer){
     customers.push(res.customer);
     closeAll(); render();
-    toast("✔ புது ஆள் சேர்ந்தார்");
+    toast("✔ " + name + " added");
   } else {
-    btn.disabled = false;
-    toast("😕 சேமிக்க முடியவில்லை — மீண்டும் முயற்சிக்கவும்", true);
+    toast("😕 Could not save — try again", true);
   }
 }
 
@@ -528,10 +895,14 @@ async function saveCustomer(){
 // Shared
 // ==================================================================
 function closeAll(){
+  if (mediaRecorder && mediaRecorder.state === "recording") mediaRecorder.stop();
+  if (playingAudio){ playingAudio.pause(); playingAudio = null; }
   document.getElementById("overlay").classList.remove("show");
   document.getElementById("custSheet").classList.remove("show");
   document.getElementById("addSheet").classList.remove("show");
   document.getElementById("padSheet").classList.remove("show");
+  document.getElementById("voiceSheet").classList.remove("show");
+  document.getElementById("histSheet").classList.remove("show");
 }
 
 let toastTimer;
@@ -542,8 +913,6 @@ function toast(text, isError){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.className = "toast", 2600);
 }
-
-loadCustomers();
 </script>
 </body>
 </html>
